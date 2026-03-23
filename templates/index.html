@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Caption Generator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <section class="hero-section" id="home">
+    <header class="header-bar">
+      <div class="logo">
+        <img src="{{ url_for('static', filename='css/background.avif') }}" alt="Logo" class="logo">
+        <span>Image Caption Generator</span>
+      </div>
+      <nav class="nav-bar">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#accessibility" class="nav-link">Accessibility</a>
+        <a href="#captioning" class="nav-link">Caption Studio</a> 
+      </nav>
+    </header>
+
+    <div class="hero-content">
+      <h1>Transform Your Images into Captions with One Click</h1>
+      <p>Instantly generate meaningful captions, hashtags, and audio descriptions using AI.</p>
+      <a href="#accessibility" class="hero-button">Start Now</a>
+    </div>
+  </section>
+
+  <!-- ================= FORM SECTION 1 ================= -->
+  <section class="form-section-1" id="accessibility">
+    <div class="form-title1">
+      📝 Accessibility Description Generator
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      <label>Upload Image:</label>
+      <div class="file-upload">
+        <label class="custom-upload">
+          <input type="file" name="image" id="image" required onchange="previewImage1(this)">Choose File
+        </label>
+        <span id="file-name">No file chosen</span>
+      </div>
+      <div id="file-info-1"></div>
+
+      <label>Translate Description To:</label>
+      <select name="language">
+        <option>None</option>
+        <option>Hindi</option>
+        <option>Urdu</option>
+      </select><br><br>
+
+      <label>
+        <input type="checkbox" name="voice" id="enable-voice" checked> Enable Voice
+      </label><br><br>
+
+      <button type="submit" name="submit_basic">Generate Description</button>
+    </form>
+  </section>
+
+ {% if image %}
+  <hr>
+  <div class="output-section-1">
+    <h3>🏞️ Uploaded Image:</h3>
+    <div class="image-preview-1">
+      <img src="{{ url_for('static', filename='uploads/' ~ image) }}" class="uploaded-image"><br><br>
+    </div>
+  </div>
+
+ {% if basic_caption %}
+   <div class="form1-output-container" style="text-align: center;">
+    <h3>Description & Voice Output:</h3>
+    <div><strong>{{ basic_caption.text }}</strong></div>
+
+    {% if basic_caption.audio %}
+      <audio id="autoPlayer" controls autoplay>
+        <source src="{{ url_for('static', filename='audio/' ~ basic_caption.audio) }}" type="audio/mp3">
+        Your browser does not support the audio element.
+      </audio>
+
+      <script>
+        const audio = document.getElementById("autoPlayer");
+        let playCount = 0;
+    
+        audio.onended = () => {
+          if (playCount < 1) {
+            playCount++;
+            audio.play();
+          }
+        };   
+      </script>
+     {% endif %}
+ {% endif %}
+    </div>
+  </div>
+ {% endif %} 
+
+  <!-- ================= FORM SECTION 2 ================= -->
+  <section class="form-section-2" id="captioning">
+    <div class="form-title2">
+      🎯 Caption Studio - Social Media Styling
+    </div>
+    
+    <form method="POST" enctype="multipart/form-data">
+      <label>Upload New Image (optional):</label>
+      <div class="file-upload">
+        <label class="custom-upload">
+          <input type="file" name="image2" id="image2" onchange="previewImage2(this)">Choose File
+        </label>
+        <span id="file-name-social">No file chosen</span>
+      </div>
+      <div id="file-info-2"></div>
+
+      {% if image %}
+      <input type="hidden" name="image_path" value="{{ image }}">
+      <p><strong>Previously Used Image: {{ image }}</strong></p>
+      {% endif %}
+
+      <label>Language:</label>
+      <select name="sm_language">
+        <option>None</option>
+        <option>Hindi</option>
+        <option>Urdu</option>
+      </select><br><br>
+
+      <label for="platform">platform</label>
+      <select name="platform" id="platform" required>
+        <option value="instagram">Instagram</option>
+        <option value="snapchat">Snapchat</option>
+        <option value="linkedin">LinkedIn</option>
+      </select>
+
+      <label for="tone">Tone</label>
+      <select name="tone" id="tone" required>
+        <option value="informal">Informal</option>
+        <option value="formal">Formal</option>
+      </select>
+
+      <label>Style (Vibe):</label>
+      <select name="sm_style">
+        <option>basic</option>
+        <option>trendy</option>
+        <option>emotional</option>
+        <option>funny</option>
+      </select><br><br>
+
+      <label>Length (Caption Size):</label>
+      <select name="sm_length">
+        <option>short</option>
+        <option>medium</option>
+        <option>long</option>
+      </select><br><br>
+
+      <button type="submit" name="submit_social">Generate Social Media Caption</button>
+    </form>
+  </section>
+
+  <!-- ✅ Show Uploaded Image Here -->
+  {% if image %}
+  <div class="output-section-2">
+    <h3>🖼️ Uploaded Image:</h3>
+    <div class="image-preview-2">
+      <img src="{{ url_for('static', filename='uploads/' ~ image) }}" alt="Uploaded Image" style="max-width: 300px; border-radius: 12px;">
+    </div>
+  </div>  
+  {% endif %}
+ 
+  <!-- Output caption display (basic or social) -->
+  {% if basic_caption %}
+  <p>{{ basic_caption.text }}</p>
+  {% endif %}
+
+  {% if sm_caption %}
+  <hr>
+  <div class="output-caption">
+    <h3>✨📸 Social Media Caption:</h3>
+    <p><strong>{{ sm_caption }}</strong></p>
+  </div>
+  {% endif %}
+
+  <script>
+    function showFileName(input) {
+      const file = input.files[0];
+      const fileNameSpan = input.name === "image_social"
+        ? document.getElementById("file-name-social")
+        : document.getElementById("file-name");
+
+      const fileInfo = isSocial
+        ? document.getElementById("file-info-2")
+        : document.getElementById("file-info-1");
+
+      if (file) {
+        fileNameSpan.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          fileInfo.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        fileNameSpan.textContent = "No file chosen";
+        fileInfo.innerHTML = "";
+      }
+    }
+  </script>
+
+
+  <!-- ✅ SCRIPT AT BOTTOM OF BODY -->
+  <script>
+    // ✅ Function for Form 1
+    function previewImage1(input) {
+      const file = input.files[0];
+      const fileNameSpan = document.getElementById("file-name");
+      const fileInfo = document.getElementById("file-info-1");
+
+      if (file) {
+        fileNameSpan.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          fileInfo.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        fileNameSpan.textContent = "No file chosen";
+        fileInfo.innerHTML = "";
+      }
+    }
+
+    // ✅ Function for Form 2
+    function previewImage2(input) {
+      const file = input.files[0];
+      const fileNameSpan = document.getElementById("file-name-social");
+      const fileInfo = document.getElementById("file-info-2");
+      
+      if (file) {
+        fileNameSpan.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          fileInfo.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        fileNameSpan.textContent = "No file chosen";
+        fileInfo.innerHTML = "";
+      }
+    }
+  </script>
+
+
+</body>
+</html>
